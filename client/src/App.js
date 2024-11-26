@@ -27,90 +27,97 @@ const FullScreenImage = styled.div`
   justify-content: center;
   align-items: center;
   background-color: black;
+  position: relative;
+  overflow: hidden;
 `;
 
 // Styled component for the main image
 const Image = styled.img`
+  position: absolute;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  animation: ${fadeIn} 1s ease-in-out; // Apply fade-in animation
+  transition: opacity 1s ease-in-out;
+  opacity: ${props => props.active ? 1 : 0};
 `;
 
 // Styled component for the clock
 const ClockContainer = styled.div`
   position: absolute;
-  top: 20px; // Positioning at the top
+  top: 20px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 72px; // Increased font size
-  font-family: 'Arial', sans-serif; // Modern font
-  color: white; // Clock color
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.5); // Optional shadow for better visibility
+  font-size: 72px;
+  font-family: 'Arial', sans-serif;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  z-index: 3; // Ensure clock is above images
 `;
 
 // Styled component for weather information
 const WeatherContainer = styled.div`
   position: absolute;
-  top: 100px; // Positioning below the clock
+  top: 100px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 24px; // Adjust font size
-  font-family: 'Arial', sans-serif; // Modern font
-  color: white; // Weather info color
+  font-size: 24px;
+  font-family: 'Arial', sans-serif;
+  color: white;
+  z-index: 3; // Ensure weather is above images
 `;
 
 // Styled component for icon grid
 const IconGrid = styled.div`
   position: absolute;
-  bottom: 30px; // Positioning at the bottom
-  left: 50%; // Centering horizontally
-  transform: translateX(-50%); // Adjusting for centering
-  display: flex; // Using flexbox for layout
-  gap: 20px; // Space between icons
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 20px;
 `;
+
 
 // Styled component for search input
 const SearchInput = styled.input`
   position: absolute;
-  bottom: 150px; // Position above icons (30px above)
+  bottom: 150px; 
   left: 50%;
   transform: translateX(-50%);
-  width: 500px; // Initial width
+  width: 500px; 
   padding: 10px;
   border-radius: 15px;
   border: none;
-  transition: all 0.3s ease;     
-  background-color: rgba(255,255,255,0.8); // Optional background change on focus
+  
+    transition: all .3s ease;     
+    background-color: rgba(255,255,255,0.8);
     
-  &:hover {
-    width: 500px; // Expanded width on focus
-    outline: none; // Remove default outline
-    background-color: rgba(255,255,255,0.2); // Optional background change on focus
-    backdrop-filter: blur(5px);
-    padding: 15px;
+    &:hover {
+      outline:none; 
+      background-color : rgba(255,255,255,0.2); 
+      backdrop-filter : blur(5px);
+      padding :15px; 
+    }
 
-}
-  &:focus {
-    width: 800px; // Expanded width on focus
-    outline: none; // Remove default outline
-    background-color: rgba(255,255,255,0.2); // Optional background change on focus
-    backdrop-filter: blur(5px);
-    width: 600px; // Initial width
-    padding: 15px;
-    color: white;
-}
+    &:focus {
+      outline:none; 
+      background-color : rgba(255,255,255,0.2); 
+      backdrop-filter : blur(5px);
+      padding :15px; 
+      color:white; 
+      width: 600px;
+    }
 `;
 
-const IconWrapper = styled.div`
-    display:flex;
-    align-items:center; // Centering vertically
-    justify-content:center; // Centering horizontally
+const IconWrapper = styled.a`
+    display:flex; 
+    align-items:center; 
+    justify-content:center; 
     background-color : rgba(255,255,255,0.2);
     backdrop-filter : blur(5px);
-    border-radius :15px;
-    width :80px; // Fixed width for uniformity
-    height :80px; // Fixed height for uniformity
+    border-radius :15px; 
+    width :80px; 
+    height :80px; 
+    text-decoration:none;
 
     &:hover {
         transform : scale(1.05);
@@ -121,8 +128,8 @@ const IconWrapper = styled.div`
 `;
 
 const StyledIcon = styled.div`
-    font-size :30px; // Adjust icon size
-    color:white; // Icon color
+    font-size :30px; 
+    color:white; 
 `;
 
 const Clock = () => {
@@ -131,7 +138,7 @@ const Clock = () => {
     useEffect(() => {
         const intervalId = setInterval(() => {
             setTime(new Date().toLocaleTimeString('no-NO', { timeZone: 'Europe/Oslo' }));
-        }, 1000); // Update every second
+        }, 1000);
 
         return () => clearInterval(intervalId);
     }, []);
@@ -168,40 +175,46 @@ const Weather = () => {
 function App() {
     const images = [image5a, image5b, image5c, image5d, image5e];
     
-    const [currentImage, setCurrentImage] = useState(images[0]);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     useEffect(() => {
         const intervalId = setInterval(() => {
-            const randomIndex = Math.floor(Math.random() * images.length);
-            setCurrentImage(images[randomIndex]);
+            setCurrentImageIndex(prevIndex => (prevIndex + 1) % images.length);
         }, 10000); // Change image every ten seconds
 
         return () => clearInterval(intervalId);
-    }, [images]);
+    }, [images.length]);
 
     return (
         <FullScreenImage>
-            <Image src={currentImage} alt="Random" />
+            {images.map((img, index) => (
+                <Image 
+                    key={index} 
+                    src={img} 
+                    alt={`Background ${index +1}`} 
+                    active={index === currentImageIndex}
+                />
+            ))}
             <Clock />
             <Weather />
             <SearchInput placeholder="Search..." />
             <IconGrid>
-                <IconWrapper>
+                <IconWrapper href="https://discord.com" target="_blank" rel="noopener noreferrer">
                     <StyledIcon><FaDiscord /></StyledIcon>
                 </IconWrapper>
-                <IconWrapper>
+                <IconWrapper href="https://youtube.com" target="_blank" rel="noopener noreferrer">
                     <StyledIcon><FaYoutube /></StyledIcon>
                 </IconWrapper>
-                <IconWrapper>
+                <IconWrapper href="https://twitch.tv" target="_blank" rel="noopener noreferrer">
                     <StyledIcon><FaTwitch /></StyledIcon>
                 </IconWrapper>
-                <IconWrapper>
+                <IconWrapper href="https://mail.google.com" target="_blank" rel="noopener noreferrer">
                     <StyledIcon><SiGmail /></StyledIcon>
                 </IconWrapper>
-                <IconWrapper>
+                <IconWrapper href="https://www.fotmob.com" target="_blank" rel="noopener noreferrer">
                     <StyledIcon><GiSoccerBall /></StyledIcon>
                 </IconWrapper>
-                <IconWrapper>
+                <IconWrapper href="https://www.finn.no" target="_blank" rel="noopener noreferrer">
                     <StyledIcon><FaShoppingCart /></StyledIcon>
                 </IconWrapper>
             </IconGrid>
